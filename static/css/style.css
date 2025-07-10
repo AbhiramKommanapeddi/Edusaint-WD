@@ -1,0 +1,66 @@
+/* School Review Manager - Custom Styles */
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    --star-color: #ffc107;
+    --text-muted: #6c757d;
+    --border-radius: 20px;
+    --card-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    background: var(--primary-gradient);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Card Styles */
+.main-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    padding: 2rem;
+    margin: 1rem 0;
+}
+
+/* Button Styles */
+.btn-custom-primary {
+    background: var(--primary-gradient);
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-weight: 600;
+    color: white;
+    transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.btn-custom-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    color: white;
+}
+
+/* Star Rating */
+.star-rating-display {
+    color: var(--star-color);
+    margin: 0 2px;
+}
+
+.star-rating-display.empty {
+    color: #ddd;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main-card {
+        margin: 0.5rem;
+        padding: 1.5rem;
+    }
+    
+    .btn-custom-primary {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}

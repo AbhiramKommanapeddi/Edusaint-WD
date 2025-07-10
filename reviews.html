@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Reviews - School Review Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            padding: 2rem 0;
+        }
+        .page-title {
+            color: white;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 700;
+        }
+        .controls-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .review-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .review-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        .table-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .star-display {
+            color: #ffc107;
+            margin: 0 5px;
+        }
+        .star-display.empty {
+            color: #ddd;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .btn-outline-primary {
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-outline-primary:hover {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        .review-header {
+            border-bottom: 2px solid #f8f9fa;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        .school-name {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+        .reviewer-name {
+            color: #6c757d;
+            font-style: italic;
+        }
+        .review-date {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .review-comment {
+            color: #333;
+            line-height: 1.6;
+            margin-top: 1rem;
+        }
+        .no-reviews {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+        .no-reviews i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        .table th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        .table td {
+            vertical-align: middle;
+            border-color: #e9ecef;
+        }
+        .rating-badge {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .table-view-hidden {
+            display: none;
+        }
+        .comment-truncate {
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container main-container">
+        <h1 class="page-title">
+            <i class="fas fa-graduation-cap"></i> School Reviews
+        </h1>
+        
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                        <strong>{{ 'Error!' if category == 'error' else 'Success!' }}</strong> {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Controls -->
+        <div class="controls-card">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="view-toggle">
+                        <label class="form-label mb-0"><strong>View Mode:</strong></label>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="cardViewBtn">
+                            <i class="fas fa-th-large"></i> Cards
+                        </button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="tableViewBtn">
+                            <i class="fas fa-table"></i> Table
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <a href="{{ url_for('add_review') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add New Review
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        {% if reviews %}
+            <!-- Card View -->
+            <div id="cardView">
+                <div class="row">
+                    {% for review in reviews %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <h5 class="school-name">{{ review.school_name }}</h5>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="rating">
+                                            {% for i in range(1, 6) %}
+                                                <i class="fas fa-star star-display {% if i <= review.rating %}{% else %}empty{% endif %}"></i>
+                                            {% endfor %}
+                                            <span class="ms-2">({{ review.rating }}/5)</span>
+                                        </div>
+                                        <small class="review-date">
+                                            {{ review.formatted_date if review.formatted_date else 'Unknown date' }}
+                                        </small>
+                                    </div>
+                                </div>
+                                <p class="reviewer-name">
+                                    <i class="fas fa-user"></i> {{ review.reviewer_name }}
+                                </p>
+                                <div class="review-comment">
+                                    {{ review.comment }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Table View -->
+            <div id="tableView" class="table-view-hidden">
+                <div class="table-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-school"></i> School</th>
+                                    <th><i class="fas fa-user"></i> Reviewer</th>
+                                    <th><i class="fas fa-star"></i> Rating</th>
+                                    <th><i class="fas fa-comment"></i> Comment</th>
+                                    <th><i class="fas fa-calendar"></i> Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for review in reviews %}
+                                    <tr>
+                                        <td><strong>{{ review.school_name }}</strong></td>
+                                        <td>{{ review.reviewer_name }}</td>
+                                        <td>
+                                            <span class="rating-badge">{{ review.rating }}/5</span>
+                                            <div class="mt-1">
+                                                {% for i in range(1, 6) %}
+                                                    <i class="fas fa-star star-display {% if i <= review.rating %}{% else %}empty{% endif %}"></i>
+                                                {% endfor %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="comment-truncate">
+                                                {{ review.comment[:100] }}{% if review.comment|length > 100 %}...{% endif %}
+                                            </div>
+                                        </td>
+                                        <td>{{ review.formatted_date_short if review.formatted_date_short else 'N/A' }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Statistics -->
+            <div class="controls-card">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <h4 class="text-primary">{{ reviews|length }}</h4>
+                        <p class="mb-0">Total Reviews</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h4 class="text-primary">
+                            {{ "%.1f"|format(reviews|sum(attribute='rating')/reviews|length) }}
+                        </h4>
+                        <p class="mb-0">Average Rating</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h4 class="text-primary">{{ reviews|map(attribute='school_name')|list|unique|list|length }}</h4>
+                        <p class="mb-0">Schools Reviewed</p>
+                    </div>
+                </div>
+            </div>
+            
+        {% else %}
+            <div class="table-card">
+                <div class="no-reviews">
+                    <i class="fas fa-comments"></i>
+                    <h3>No Reviews Yet</h3>
+                    <p>Be the first to share your school experience!</p>
+                    <a href="{{ url_for('add_review') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add First Review
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // View toggle functionality
+        document.getElementById('cardViewBtn').addEventListener('click', function() {
+            document.getElementById('cardView').classList.remove('table-view-hidden');
+            document.getElementById('tableView').classList.add('table-view-hidden');
+            
+            // Update button states
+            this.classList.remove('btn-outline-primary');
+            this.classList.add('btn-primary');
+            document.getElementById('tableViewBtn').classList.remove('btn-primary');
+            document.getElementById('tableViewBtn').classList.add('btn-outline-primary');
+            
+            localStorage.setItem('viewMode', 'card');
+        });
+        
+        document.getElementById('tableViewBtn').addEventListener('click', function() {
+            document.getElementById('cardView').classList.add('table-view-hidden');
+            document.getElementById('tableView').classList.remove('table-view-hidden');
+            
+            // Update button states
+            this.classList.remove('btn-outline-primary');
+            this.classList.add('btn-primary');
+            document.getElementById('cardViewBtn').classList.remove('btn-primary');
+            document.getElementById('cardViewBtn').classList.add('btn-outline-primary');
+            
+            localStorage.setItem('viewMode', 'table');
+        });
+        
+        // Remember view preference
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedView = localStorage.getItem('viewMode');
+            if (savedView === 'table') {
+                document.getElementById('tableViewBtn').click();
+            } else {
+                document.getElementById('cardViewBtn').click();
+            }
+        });
+    </script>
+</body>
+</html>
